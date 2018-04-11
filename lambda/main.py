@@ -41,9 +41,10 @@ def deregisterOldImages(instance_name,retention_days):
             EC2.deregister_image(ImageId=image['ImageId'])
             if image['RootDeviceType'] == 'ebs':
                 for device_map in image['BlockDeviceMappings']:
-                    snapshot_id = device_map['Ebs']['SnapshotId']
-                    LOGGER.info('Deleting ' + snapshot_id + ' snapshot used by ' + image['ImageId'] + ' AMI ...')
-                    EC2.delete_snapshot(SnapshotId=snapshot_id)
+                    if 'Ebs' in device_map.keys():
+                        snapshot_id = device_map['Ebs']['SnapshotId']
+                        LOGGER.info('Deleting ' + snapshot_id + ' snapshot used by ' + image['ImageId'] + ' AMI ...')
+                        EC2.delete_snapshot(SnapshotId=snapshot_id)
 
 def handle(event, context):
     """ Creates AMIs of all the instances that have the backup tag """
